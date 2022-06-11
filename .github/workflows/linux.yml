@@ -1,0 +1,46 @@
+jobs:
+  stage_0_job_0:
+    name: rosbag2-transport ros-core rosbag2-py ros2bag
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+    needs: []
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+    - name: Build ros-humble-rosbag2-transport ros-humble-ros-core ros-humble-rosbag2-py
+        ros-humble-ros2bag
+      env:
+        ANACONDA_API_TOKEN: ${{ secrets.ANACONDA_API_TOKEN }}
+        CURRENT_RECIPES: ros-humble-rosbag2-transport ros-humble-ros-core ros-humble-rosbag2-py
+          ros-humble-ros2bag
+        DOCKER_IMAGE: condaforge/linux-anvil-cos7-x86_64
+      run: |
+        export CI=azure
+        export GIT_BRANCH=$BUILD_SOURCEBRANCHNAME
+        export FEEDSTOCK_NAME=$(basename ${BUILD_REPOSITORY_NAME})
+        .scripts/run_docker_build.sh
+  stage_1_job_1:
+    name: rosbag2-tests rosbag2 ros-base
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+    needs:
+    - stage_0_job_0
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+    - name: Build ros-humble-rosbag2-tests ros-humble-rosbag2 ros-humble-ros-base
+      env:
+        ANACONDA_API_TOKEN: ${{ secrets.ANACONDA_API_TOKEN }}
+        CURRENT_RECIPES: ros-humble-rosbag2-tests ros-humble-rosbag2 ros-humble-ros-base
+        DOCKER_IMAGE: condaforge/linux-anvil-cos7-x86_64
+      run: |
+        export CI=azure
+        export GIT_BRANCH=$BUILD_SOURCEBRANCHNAME
+        export FEEDSTOCK_NAME=$(basename ${BUILD_REPOSITORY_NAME})
+        .scripts/run_docker_build.sh
+on:
+  push:
+    branches:
+    - buildbranch_linux
